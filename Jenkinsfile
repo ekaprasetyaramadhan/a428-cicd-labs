@@ -1,6 +1,6 @@
 properties([
     pipelineTriggers([
-        pollSCM('H/2 * * * *')
+        pollSCM('H/2 * * * *') // Memeriksa perubahan di repository setiap 2 menit
     ])
 ])
 
@@ -10,7 +10,10 @@ node {
             checkout scm // Mengkloning repository
         }
         stage('Build') {
-            sh 'npm install'
+            sh 'npm install' // Menginstal dependensi
+        }
+        stage('Test') {
+            sh './jenkins/scripts/test.sh' // Menjalankan script test.sh
         }
     }
 }
