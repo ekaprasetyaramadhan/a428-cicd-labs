@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  frontend:
+    build: .
+    ports:
+      - "80:80"
+    networks:
+      - react-network
+    restart: always
+
+networks:
+  react-network:
+    driver: bridge
