@@ -3,6 +3,7 @@ version: "3.8"
 services:
   frontend:
     build: .
+    image: ekaramadhan35/react-app:latest # Menambahkan nama image
     ports:
       - "80:80"
     networks:
