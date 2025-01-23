@@ -24,7 +24,7 @@ node {
                 sshagent(['27e4f2b0-d147-40d8-974c-7d1c10637827']) { // SSH Key yang sudah ditambahkan ke Jenkins
                     sh '''
                     echo "Deploying to EC2..."
-                    ssh -o StrictHostKeyChecking=no ubuntu@13.229.251.5 "docker pull ekaramadhan35/react-app && docker stop react-app || true && docker rm react-app || true && docker run -d -p 80:80 --name react-app ekaramadhan35/react-app"
+                    ssh -o StrictHostKeyChecking=no ubuntu@$13.229.251.5 "docker pull ekaramadhan35/react-app && docker stop react-app || true && docker rm react-app || true && docker run -d -p 80:80 --name react-app ekaramadhan35/react-app"
                     '''
                 }
                 
