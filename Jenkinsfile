@@ -1,21 +1,33 @@
 node {
+    environment {
+        EC2_PUBLIC_IP = '13.229.251.5'  // Ganti dengan IP publik EC2 Anda
+    }
     docker.image('node:16-buster-slim').inside('-p 3000:3000') {
         stage('Checkout Code') {
             checkout scm // Mengkloning repository
         }
-        
+
         stage('Build') {
             sh 'npm install' // Menginstal dependensi
         }
-        
+
         stage('Test') {
             sh './jenkins/scripts/test.sh' // Menjalankan script test.sh
         }
-        
-        stage('Deploy') {
+
+        stage('Deploy to EC2') {
             try {
                 sh './jenkins/scripts/deliver.sh' // Menjalankan script untuk deployment
-                input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)' 
+                input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)'
+
+                // Deployment ke EC2
+                sshagent(['27e4f2b0-d147-40d8-974c-7d1c10637827']) { // SSH Key yang sudah ditambahkan ke Jenkins
+                    sh '''
+                    echo "Deploying to EC2..."
+                    ssh -o StrictHostKeyChecking=no ubuntu@13.229.251.5 "docker pull ekaramadhan35/react-app && docker stop react-app || true && docker rm react-app || true && docker run -d -p 80:80 --name react-app ekaramadhan35/react-app"
+                    '''
+                }
+                
                 sh './jenkins/scripts/kill.sh' // Menjalankan script untuk menghentikan proses
             } catch (e) {
                 error "Gagal pada stage Deploy: ${e.getMessage()}"
