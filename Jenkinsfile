@@ -10,11 +10,15 @@ node {
             checkout scm
         }
 
-        stage('Install Dependencies') {
-            echo "Installing dependencies..."
-            sh '''
-                npm install
-            '''
+        stage('Setup Node.js and Install Dependencies') {
+            echo "Setting up Node.js and installing dependencies..."
+            docker.image('node:16-buster-slim').inside('-v /var/run/docker.sock:/var/run/docker.sock --user root') {
+                sh '''
+                    apt-get update
+                    apt-get install -y npm
+                    npm install
+                '''
+            }
         }
 
         stage('Build Docker Image') {
