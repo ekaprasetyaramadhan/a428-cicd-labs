@@ -14,8 +14,6 @@ node {
             echo "Setting up Node.js and installing dependencies..."
             docker.image('node:16-buster-slim').inside('-v /var/run/docker.sock:/var/run/docker.sock --user root') {
                 sh '''
-                    apt-get update
-                    apt-get install -y npm
                     npm install
                 '''
             }
@@ -28,13 +26,15 @@ node {
 
         stage('Test') {
             echo "Running tests..."
-            sh '''
-            if [ -f ./jenkins/scripts/test.sh ]; then
-                ./jenkins/scripts/test.sh
-            else
-                echo "No tests found, skipping..."
-            fi
-            '''
+            docker.image('node:16-buster-slim').inside('-v /var/run/docker.sock:/var/run/docker.sock --user root') {
+                sh '''
+                    if [ -f ./jenkins/scripts/test.sh ]; then
+                        ./jenkins/scripts/test.sh
+                    else
+                        echo "No tests found, skipping..."
+                    fi
+                '''
+            }
         }
 
         stage('Setup SSH and Known Hosts') {
