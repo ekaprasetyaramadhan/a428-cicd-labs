@@ -21,7 +21,7 @@ node {
                 input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)'
 
                 // Deployment ke EC2
-                sshagent(['react-app-key']) { // SSH Key yang sudah ditambahkan ke Jenkins
+                sshagent(['submission-akhir-keypair']) { // SSH Key yang sudah ditambahkan ke Jenkins
                     sh '''
                     echo "Deploying to EC2..."
                     ssh -o StrictHostKeyChecking=no ubuntu@$EC2_PUBLIC_IP "docker pull ekaramadhan35/react-app && docker stop react-app || true && docker rm react-app || true && docker run -d -p 80:80 --name react-app ekaramadhan35/react-app"
