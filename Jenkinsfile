@@ -15,11 +15,20 @@ node {
             sh "docker build -t ${IMAGE_NAME}:latest ."
         }
 
+        stage('Setup SSH and Known Hosts') {
+            echo "Setting up SSH and known hosts..."
+            sh """
+                mkdir -p ~/.ssh
+                chmod 700 ~/.ssh
+                ssh-keyscan -H ${AWS_EC2_IP} >> ~/.ssh/known_hosts
+                chmod 644 ~/.ssh/known_hosts
+            """
+        }
+
         stage('Push Docker Image to EC2') {
             echo "Pushing Docker image to EC2..."
             withCredentials([sshUserPrivateKey(credentialsId: SSH_CREDENTIALS_ID, keyFileVariable: 'SSH_KEY')]) {
                 sh """
-                    ssh-keyscan -H ${AWS_EC2_IP} >> ~/.ssh/known_hosts
                     docker save ${IMAGE_NAME}:latest | ssh -i ${SSH_KEY} ubuntu@${AWS_EC2_IP} 'docker load'
                 """
             }
