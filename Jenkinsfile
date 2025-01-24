@@ -26,7 +26,7 @@ node {
         stage('Build Docker Image') {
             sh '''
             echo "Building Docker image..."
-            docker build -t $DOCKER_IMAGE .
+            docker build -t ekaramadhan35/react-app .
             '''
         }
 
@@ -37,7 +37,7 @@ node {
                 echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
 
                 echo "Pushing Docker image to Docker Hub..."
-                docker push $DOCKER_IMAGE
+                docker push ekaramadhan35/react-app
                 '''
             }
         }
@@ -50,7 +50,7 @@ node {
                 withCredentials([sshUserPrivateKey(credentialsId: 'submission-akhir-keypair', keyFileVariable: 'SSH_KEY')]) {
                     sh '''
                     echo "Deploying to EC2..."
-                    ssh -o StrictHostKeyChecking=no -i $SSH_KEY ubuntu@$EC2_PUBLIC_IP "docker pull $DOCKER_IMAGE && docker stop react-app || true && docker rm react-app || true && docker run -d -p 80:80 --name react-app $DOCKER_IMAGE"
+                    ssh -o StrictHostKeyChecking=no -i $SSH_KEY ubuntu@$54.254.140.201 "docker pull ekaramadhan35/react-app && docker stop react-app || true && docker rm react-app || true && docker run -d -p 80:80 --name react-app ekaramadhan35/react-app"
                     '''
                 }
 
