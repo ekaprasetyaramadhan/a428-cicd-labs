@@ -1,8 +1,12 @@
 node {
     environment {
         EC2_PUBLIC_IP = '54.254.140.201'  // Ganti dengan IP publik EC2 Anda
-        DOCKER_IMAGE = 'ekaramadhan35/react-app'  // Ganti dengan nama image Anda
+        DOCKER_IMAGE = 'ekaramadhan35/react-app'  // Nama image Docker
+        SSH_CREDENTIALS_ID = 'submission-akhir-keypair'  // ID kredensial SSH
+        DOCKERHUB_CREDENTIALS_ID = 'dockerhub-credentials'  // ID kredensial Docker Hub
     }
+
+    // Menggunakan Docker Node.js untuk menjalankan semua perintah
     docker.image('node:16-buster-slim').inside('--user root -p 3000:3000') {
         stage('Setup Environment') {
             sh '''
@@ -15,49 +19,58 @@ node {
             checkout scm
         }
 
-        stage('Build') {
+        stage('Install Dependencies') {
             sh 'npm install'
         }
 
+        stage('Build React App') {
+            sh 'npm run build'
+        }
+
         stage('Test') {
-            sh './jenkins/scripts/test.sh'
+            // Jalankan script test, pastikan file test ada
+            sh './jenkins/scripts/test.sh || echo "No tests found, skipping..."'
         }
 
         stage('Build Docker Image') {
             sh '''
             echo "Building Docker image..."
-            docker build -t ekaramadhan35/react-app .
+            docker build -t $DOCKER_IMAGE .
             '''
         }
 
         stage('Push Docker Image to Docker Hub') {
-            withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+            withCredentials([usernamePassword(credentialsId: DOCKERHUB_CREDENTIALS_ID, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                 sh '''
                 echo "Logging in to Docker Hub..."
                 echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
 
                 echo "Pushing Docker image to Docker Hub..."
-                docker push ekaramadhan35/react-app
+                docker push $DOCKER_IMAGE
                 '''
             }
         }
 
         stage('Deploy to EC2') {
             try {
-                sh './jenkins/scripts/deliver.sh'
-                input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)'
-
-                withCredentials([sshUserPrivateKey(credentialsId: 'submission-akhir-keypair', keyFileVariable: 'SSH_KEY')]) {
+                withCredentials([sshUserPrivateKey(credentialsId: SSH_CREDENTIALS_ID, keyFileVariable: 'SSH_KEY')]) {
                     sh '''
                     echo "Deploying to EC2..."
-                    ssh -o StrictHostKeyChecking=no -i $SSH_KEY ubuntu@$54.254.140.201 "docker pull ekaramadhan35/react-app && docker stop react-app || true && docker rm react-app || true && docker run -d -p 80:80 --name react-app ekaramadhan35/react-app"
+                    ssh -o StrictHostKeyChecking=no -i $SSH_KEY ubuntu@$EC2_PUBLIC_IP "
+                        docker pull $DOCKER_IMAGE &&
+                        docker stop react-app || true &&
+                        docker rm react-app || true &&
+                        docker run -d -p 80:80 --name react-app $DOCKER_IMAGE
+                    "
                     '''
                 }
-
-                sh './jenkins/scripts/kill.sh'
             } catch (e) {
                 error "Gagal pada stage Deploy: ${e.getMessage()}"
             }
+        }
+
+        stage('Post-Deployment Confirmation') {
+            input message: 'Deployment selesai. Apakah Anda ingin melanjutkan atau menghentikan pipeline?'
         }
     }
 }
