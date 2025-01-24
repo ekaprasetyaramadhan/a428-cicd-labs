@@ -17,7 +17,7 @@ node {
 
         stage('Push Docker Image to EC2') {
             echo "Pushing Docker image to EC2..."
-            withCredentials([sshUserPrivateKey(credentialsId: SSH_CREDENTIALS_ID, keyFileVariable: 'SSH_KEY')]) {
+            withCredentials([sshUserPrivateKey(credentialsId: 'submission-akhir-keypair', keyFileVariable: 'SSH_KEY')]) {
                 sh """
                     docker save ${IMAGE_NAME}:latest | ssh -i ${SSH_KEY} ubuntu@${AWS_EC2_IP} 'docker load'
                 """
@@ -26,7 +26,7 @@ node {
 
         stage('Deploy Application') {
             echo "Deploying application on EC2..."
-            withCredentials([sshUserPrivateKey(credentialsId: SSH_CREDENTIALS_ID, keyFileVariable: 'SSH_KEY')]) {
+            withCredentials([sshUserPrivateKey(credentialsId: 'submission-akhir-keypair', keyFileVariable: 'SSH_KEY')]) {
                 sh """
                     ssh -i ${SSH_KEY} ec2-user@${AWS_EC2_IP} '
                     docker stop ${IMAGE_NAME} || true && \
