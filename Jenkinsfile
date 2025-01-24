@@ -32,15 +32,6 @@ node {
             """
         }
 
-        stage('Push Docker Image to EC2') {
-            echo "Pushing Docker image to EC2..."
-            withCredentials([sshUserPrivateKey(credentialsId: SSH_CREDENTIALS_ID, keyFileVariable: 'SSH_KEY')]) {
-                sh """
-                    docker save ${IMAGE_NAME}:latest | ssh -i ${SSH_KEY} ubuntu@${AWS_EC2_IP} 'docker load'
-                """
-            }
-        }
-
         stage('Test') {
             echo "Running tests..."
             sh '''
@@ -50,6 +41,15 @@ node {
                 echo "No tests found, skipping..."
             fi
             '''
+        }
+
+        stage('Push Docker Image to EC2') {
+            echo "Pushing Docker image to EC2..."
+            withCredentials([sshUserPrivateKey(credentialsId: SSH_CREDENTIALS_ID, keyFileVariable: 'SSH_KEY')]) {
+                sh """
+                    docker save ${IMAGE_NAME}:latest | ssh -i ${SSH_KEY} ubuntu@${AWS_EC2_IP} 'docker load'
+                """
+            }
         }
 
         stage('Deploy Application') {
