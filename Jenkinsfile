@@ -20,11 +20,11 @@ node {
                 sh './jenkins/scripts/deliver.sh' // Menjalankan script untuk deployment
                 input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)'
 
-                // Deployment ke EC2
-                sshagent(['submission-akhir-keypair']) { // SSH Key yang sudah ditambahkan ke Jenkins
+                // Deployment ke EC2 menggunakan withCredentials
+                withCredentials([sshUserPrivateKey(credentialsId: 'submission-akhir-keypair', keyFileVariable: 'SSH_KEY')]) {
                     sh '''
                     echo "Deploying to EC2..."
-                    ssh -o StrictHostKeyChecking=no ubuntu@$EC2_PUBLIC_IP "docker pull ekaramadhan35/react-app && docker stop react-app || true && docker rm react-app || true && docker run -d -p 80:80 --name react-app ekaramadhan35/react-app"
+                    ssh -o StrictHostKeyChecking=no -i $SSH_KEY ubuntu@$EC2_PUBLIC_IP "docker pull ekaramadhan35/react-app && docker stop react-app || true && docker rm react-app || true && docker run -d -p 80:80 --name react-app ekaramadhan35/react-app"
                     '''
                 }
                 
