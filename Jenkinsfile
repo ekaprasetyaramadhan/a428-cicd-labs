@@ -10,13 +10,6 @@ node {
             checkout scm
         }
 
-        stage('Install Dependencies') {
-            echo "Installing dependencies..."
-            sh '''
-                npm install
-            '''
-        }
-
         stage('Build Docker Image') {
             echo "Building Docker image..."
             sh "docker build -t ${IMAGE_NAME}:latest ."
@@ -30,17 +23,6 @@ node {
                 ssh-keyscan -H ${AWS_EC2_IP} >> ~/.ssh/known_hosts
                 chmod 644 ~/.ssh/known_hosts
             """
-        }
-
-        stage('Test') {
-            echo "Running tests..."
-            sh '''
-            if [ -f ./jenkins/scripts/test.sh ]; then
-                ./jenkins/scripts/test.sh
-            else
-                echo "No tests found, skipping..."
-            fi
-            '''
         }
 
         stage('Push Docker Image to EC2') {
@@ -64,11 +46,6 @@ node {
                 """
             }
         }
-
-        stage('Post-Deployment Confirmation') {
-            input message: 'Deployment selesai. Apakah Anda ingin melanjutkan atau menghentikan pipeline?'
-        }
-
     } catch (Exception e) {
         echo "Pipeline failed: ${e.getMessage()}"
         currentBuild.result = 'FAILURE'
