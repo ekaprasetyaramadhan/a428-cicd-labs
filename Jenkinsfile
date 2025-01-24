@@ -10,6 +10,24 @@ node {
             checkout scm
         }
 
+        stage('Install Node.js and npm') {
+            echo "Installing Node.js and npm..."
+            sh '''
+                # Instalasi Node.js (menggunakan nvm)
+                curl -sL https://deb.nodesource.com/setup_16.x | bash -
+                apt-get install -y nodejs
+                node -v
+                npm -v
+            '''
+        }
+
+        stage('Install Dependencies') {
+            echo "Installing dependencies..."
+            sh '''
+                npm install
+            '''
+        }
+
         stage('Build Docker Image') {
             echo "Building Docker image..."
             sh "docker build -t ${IMAGE_NAME}:latest ."
