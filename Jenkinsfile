@@ -73,7 +73,9 @@ node {
                 sh './jenkins/scripts/deliver.sh'
             }
             input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)'
-            sh './jenkins/scripts/kill.sh' // Menjalankan script untuk menghentikan proses
+            docker.image('node:16-buster-slim').inside('-v /var/run/docker.sock:/var/run/docker.sock --user root') {
+                sh './jenkins/scripts/kill.sh' // Menjalankan script untuk menghentikan proses
+            }
         }
 
     } catch (Exception e) {
