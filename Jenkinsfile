@@ -34,6 +34,17 @@ node {
             }
         }
 
+        stage('Test') {
+            echo "Running tests..."
+            sh '''
+            if [ -f ./jenkins/scripts/test.sh ]; then
+                ./jenkins/scripts/test.sh
+            else
+                echo "No tests found, skipping..."
+            fi
+            '''
+        }
+
         stage('Deploy Application') {
             echo "Deploying application on EC2..."
             withCredentials([sshUserPrivateKey(credentialsId: SSH_CREDENTIALS_ID, keyFileVariable: 'SSH_KEY')]) {
@@ -46,6 +57,11 @@ node {
                 """
             }
         }
+
+        stage('Post-Deployment Confirmation') {
+            input message: 'Deployment selesai. Apakah Anda ingin melanjutkan atau menghentikan pipeline?'
+        }
+
     } catch (Exception e) {
         echo "Pipeline failed: ${e.getMessage()}"
         currentBuild.result = 'FAILURE'
