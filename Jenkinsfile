@@ -7,6 +7,13 @@ node {
             checkout scm // Mengkloning repository
         }
 
+        stage('Setup Environment') {
+            sh '''
+            apt-get update
+            apt-get install -y openssh-client
+            '''
+        }
+
         stage('Build') {
             sh 'npm install' // Menginstal dependensi
         }
