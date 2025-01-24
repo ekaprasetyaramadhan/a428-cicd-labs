@@ -1,6 +1,6 @@
 node {
     environment {
-        EC2_PUBLIC_IP = '13.229.251.5'  // Ganti dengan IP publik EC2 Anda
+        EC2_PUBLIC_IP = '54.254.140.201'  // Ganti dengan IP publik EC2 Anda
     }
     docker.image('node:16-buster-slim').inside('-p 3000:3000') {
         stage('Checkout Code') {
