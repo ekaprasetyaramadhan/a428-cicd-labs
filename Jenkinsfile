@@ -67,17 +67,12 @@ node {
                     '
                 """
             }
-            
-            echo "Running deployment scripts..."
-            docker.image('node:16-buster-slim').inside('-v /var/run/docker.sock:/var/run/docker.sock --user root') {
-                sh './jenkins/scripts/deliver.sh'
-            }
-            input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)'
-            docker.image('node:16-buster-slim').inside('-v /var/run/docker.sock:/var/run/docker.sock --user root') {
-                sh './jenkins/scripts/kill.sh' // Menjalankan script untuk menghentikan proses
-            }
         }
 
+         // Confirmation stage to manually proceed after deployment
+        stage('Post-Deployment Confirmation') {
+            input message: 'Deployment selesai. Apakah Anda ingin melanjutkan atau menghentikan pipeline?'
+        }
     } catch (Exception e) {
         echo "Pipeline failed: ${e.getMessage()}"
         currentBuild.result = 'FAILURE'
