@@ -1,13 +1,13 @@
 node {
     environment {
-        EC2_PUBLIC_IP = '54.254.140.201'  // Ganti dengan IP publik EC2 Anda
+        EC2_PUBLIC_IP = '54.254.140.201'  // IP publik EC2 Anda
         DOCKER_IMAGE = 'ekaramadhan35/react-app'  // Nama image Docker
         SSH_CREDENTIALS_ID = 'submission-akhir-keypair'  // ID kredensial SSH
         DOCKERHUB_CREDENTIALS_ID = 'dockerhub-credentials'  // ID kredensial Docker Hub
     }
 
-    // Menggunakan Docker Node.js untuk menjalankan semua perintah
-    docker.image('node:16-buster-slim').inside('--user root -p 3000:3000') {
+    // Menggunakan Docker Node.js dengan akses Docker Host
+    docker.image('node:16-buster-slim').inside('-v /var/run/docker.sock:/var/run/docker.sock --user root') {
         stage('Setup Environment') {
             sh '''
             apt-get update
@@ -28,8 +28,14 @@ node {
         }
 
         stage('Test') {
-            // Jalankan script test, pastikan file test ada
-            sh './jenkins/scripts/test.sh || echo "No tests found, skipping..."'
+            // Jalankan script test
+            sh '''
+            if [ -f ./jenkins/scripts/test.sh ]; then
+                ./jenkins/scripts/test.sh
+            else
+                echo "No tests found, skipping..."
+            fi
+            '''
         }
 
         stage('Build Docker Image') {
