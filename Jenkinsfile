@@ -57,6 +57,8 @@ node {
         }
 
         stage('Deploy Application') {
+            sh './jenkins/scripts/deliver.sh' // Menjalankan script untuk deployment
+            input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)'
             echo "Deploying application on EC2..."
             withCredentials([sshUserPrivateKey(credentialsId: SSH_CREDENTIALS_ID, keyFileVariable: 'SSH_KEY')]) {
                 sh """
@@ -67,12 +69,10 @@ node {
                     '
                 """
             }
+
+            sh './jenkins/scripts/kill.sh' // Menjalankan script untuk menghentikan proses
         }
 
-         // Confirmation stage to manually proceed after deployment
-        stage('Post-Deployment Confirmation') {
-            input message: 'Deployment selesai. Apakah Anda ingin melanjutkan atau menghentikan pipeline?'
-        }
     } catch (Exception e) {
         echo "Pipeline failed: ${e.getMessage()}"
         currentBuild.result = 'FAILURE'
