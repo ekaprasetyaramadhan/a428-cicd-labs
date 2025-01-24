@@ -57,8 +57,6 @@ node {
         }
 
         stage('Deploy Application') {
-            sh './jenkins/scripts/deliver.sh' // Menjalankan script untuk deployment
-            input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)'
             echo "Deploying application on EC2..."
             withCredentials([sshUserPrivateKey(credentialsId: SSH_CREDENTIALS_ID, keyFileVariable: 'SSH_KEY')]) {
                 sh """
@@ -69,7 +67,12 @@ node {
                     '
                 """
             }
-
+            
+            echo "Running deployment scripts..."
+            docker.image('node:16-buster-slim').inside('-v /var/run/docker.sock:/var/run/docker.sock --user root') {
+                sh './jenkins/scripts/deliver.sh'
+            }
+            input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)'
             sh './jenkins/scripts/kill.sh' // Menjalankan script untuk menghentikan proses
         }
 
