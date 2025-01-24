@@ -10,9 +10,27 @@ node {
             checkout scm
         }
 
+        stage('Install Dependencies') {
+            echo "Installing dependencies..."
+            sh '''
+                npm install
+            '''
+        }
+
         stage('Build Docker Image') {
             echo "Building Docker image..."
             sh "docker build -t ${IMAGE_NAME}:latest ."
+        }
+
+        stage('Test') {
+            echo "Running tests..."
+            sh '''
+            if [ -f ./jenkins/scripts/test.sh ]; then
+                ./jenkins/scripts/test.sh
+            else
+                echo "No tests found, skipping..."
+            fi
+            '''
         }
 
         stage('Setup SSH and Known Hosts') {
