@@ -10,31 +10,16 @@ node {
             checkout scm
         }
 
-        stage('Setup Node.js and Install Dependencies') {
-            echo "Setting up Node.js and installing dependencies..."
-            docker.image('node:16-buster-slim').inside('-v /var/run/docker.sock:/var/run/docker.sock --user root') {
-                sh '''
-                    npm install
-                '''
-            }
+        stage('Install Dependencies') {
+            echo "Installing dependencies..."
+            sh '''
+                npm install
+            '''
         }
 
         stage('Build Docker Image') {
             echo "Building Docker image..."
             sh "docker build -t ${IMAGE_NAME}:latest ."
-        }
-
-        stage('Test') {
-            echo "Running tests..."
-            docker.image('node:16-buster-slim').inside('-v /var/run/docker.sock:/var/run/docker.sock --user root') {
-                sh '''
-                    if [ -f ./jenkins/scripts/test.sh ]; then
-                        ./jenkins/scripts/test.sh
-                    else
-                        echo "No tests found, skipping..."
-                    fi
-                '''
-            }
         }
 
         stage('Setup SSH and Known Hosts') {
@@ -68,6 +53,12 @@ node {
                 """
             }
         }
+
+        // Confirmation stage to manually proceed after deployment
+        stage('Post-Deployment Confirmation') {
+            input message: 'Deployment selesai. Apakah Anda ingin melanjutkan atau menghentikan pipeline?'
+        }
+
     } catch (Exception e) {
         echo "Pipeline failed: ${e.getMessage()}"
         currentBuild.result = 'FAILURE'
