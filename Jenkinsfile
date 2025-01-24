@@ -20,12 +20,12 @@ node {
                 sh './jenkins/scripts/deliver.sh' // Menjalankan script untuk deployment
                 input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)'
 
-                // Deployment ke EC2 menggunakan SSH
-                withCredentials([sshUserPrivateKey(credentialsId: 'my-ssh-key-id', keyFileVariable: 'PRIVATE_KEY')]) {
-                    sh """
+                // Deployment ke EC2
+                sshagent(['react-app-key']) { // SSH Key yang sudah ditambahkan ke Jenkins
+                    sh '''
                     echo "Deploying to EC2..."
-                    ssh -i $PRIVATE_KEY -o StrictHostKeyChecking=no ubuntu@$EC2_PUBLIC_IP "docker pull ekaramadhan35/react-app && docker stop react-app || true && docker rm react-app || true && docker run -d -p 80:80 --name react-app ekaramadhan35/react-app"
-                    """
+                    ssh -o StrictHostKeyChecking=no ubuntu@$EC2_PUBLIC_IP "docker pull ekaramadhan35/react-app && docker stop react-app || true && docker rm react-app || true && docker run -d -p 80:80 --name react-app ekaramadhan35/react-app"
+                    '''
                 }
                 
                 sh './jenkins/scripts/kill.sh' // Menjalankan script untuk menghentikan proses
