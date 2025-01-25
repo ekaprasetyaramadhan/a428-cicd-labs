@@ -18,6 +18,11 @@ class App extends Component {
           CI CD Pipeline menggunakan Jenkins
           <br />
           Operation dan Monitoring menggunakan Prometheus dan Grafana
+          <br />
+          <br />
+          <br />
+          <br />
+          Semoga mendapatkan kesempatkan dikelas expert!!!!!!!!!!!!!!!!!!!!!!
         </p>
       </div>
     );
