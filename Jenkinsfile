@@ -47,6 +47,13 @@ node {
             """
         }
 
+        // Manual Approval Stage
+        stage('Manual Approval') {
+            input message: 'Lanjutkan ke tahap Deploy?',
+                  ok: 'Proceed',
+                  parameters: []
+        }
+
         stage('Push Docker Image to EC2') {
             echo "Pushing Docker image to EC2..."
             withCredentials([sshUserPrivateKey(credentialsId: SSH_CREDENTIALS_ID, keyFileVariable: 'SSH_KEY')]) {
