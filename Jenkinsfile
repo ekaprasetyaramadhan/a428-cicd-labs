@@ -69,10 +69,12 @@ node {
             }
         }
 
-         // Confirmation stage to manually proceed after deployment
+        // Automated 1-minute delay after deployment
         stage('Post-Deployment Confirmation') {
-            input message: 'Deployment selesai. Apakah Anda ingin melanjutkan atau menghentikan pipeline?'
+            echo "Application is running. Waiting for 1 minute before ending the pipeline..."
+            sleep 60 // Pause for 60 seconds
         }
+
     } catch (Exception e) {
         echo "Pipeline failed: ${e.getMessage()}"
         currentBuild.result = 'FAILURE'
