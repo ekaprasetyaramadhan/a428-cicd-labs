@@ -22,7 +22,7 @@ class App extends Component {
           <br />
           <br />
           <br />
-          Semoga mendapatkan kesempatkan dikelas expert!!!!!!!!!!!!!!!!!!!!!!
+          Semoga mendapatkan kesempatkan dikelas expert!!!!!!!!!!!!!!!!!!!!!! 🚀
         </p>
       </div>
     );
